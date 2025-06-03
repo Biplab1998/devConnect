@@ -1,0 +1,18 @@
+{
+  "name": "dev-connect",
+  "version": "1.0.0",
+  "description": "Its is a place where developers can connect.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Biplab Paul",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
