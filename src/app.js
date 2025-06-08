@@ -2,10 +2,19 @@ const express = require("express");
 
 const app = express();
 
-app.use("/user/:username/:pass/:place", (req, res) => {
-  console.log(req.query.user);
-  console.log(req.params);
-  res.send("This is the users page");
+// defining a middleware
+app.use("/admin", (req, res, next) => {
+  const token = "xyzp";
+  const isAuthorized = token === "xyz";
+  if (!isAuthorized) {
+    res.status(401).send("Unauthorized user");
+  } else {
+    next();
+  }
+});
+
+app.get("/admin/dashboard", (req, res) => {
+  res.send("This is a dashboard only for admins");
 });
 
 // app.get("/user", (req, res) => {
