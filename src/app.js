@@ -5,15 +5,15 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/signup", (req, res) => {
+app.post("/signup", async (req, res) => {
   console.log(req.body);
   const user = new User(req.body);
 
   try {
-    user.save();
+    await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.send(400, "User not added: something when wrong");
+    res.status(400).send("User not added:" + err.message);
   }
 });
 
@@ -28,7 +28,7 @@ app.get("/user", async (req, res) => {
       : res.send(fetchedUser);
     console.log(fetchedUser);
   } catch (err) {
-    res.send(400, "User not found: something when wrong");
+    res.status(400).send("User not found: something when wrong");
   }
 });
 app.get("/feed", async (req, res) => {
@@ -41,7 +41,7 @@ app.get("/feed", async (req, res) => {
       : res.send(fetchedUser);
     console.log(fetchedUser);
   } catch (err) {
-    res.send(400, "User not found: something when wrong");
+    res.status(400).send("User not found: something when wrong");
   }
 });
 
@@ -58,22 +58,40 @@ app.delete("/user", async (req, res) => {
     res.status(400).send("User not found: something when wrong");
   }
 });
-app.patch("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   console.log(req.body);
+  console.log(req.params);
 
   try {
-    const updateUser = await User.findOneAndUpdate(
-      { emailId: userEmail },
-      req.body,
-      {
-        returnDocument: "before",
-      }
+    const allowedUpdates = [
+      "gender",
+      "age",
+      "password",
+      "photoUrl",
+      "about",
+      "skills",
+    ];
+    const isUpdateAllowed = Object.keys(req.body).every((key) =>
+      allowedUpdates.includes(key)
     );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
+    if (req.body?.skills.length > 5) {
+      throw new Error("Skills can be 5 maximum");
+    }
+
+    const updateUser = await User.findOneAndUpdate({ _id: userId }, req.body, {
+      returnDocument: "before",
+      runValidators: true,
+    });
 
     res.send(updateUser);
   } catch (err) {
-    res.status(400).send("User not found: something when wrong");
+    res.status(400).send("User not found: " + err.message);
   }
 });
 
