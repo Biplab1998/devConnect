@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const { validateSignUpData } = require("./utils/validation");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,23 +40,9 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-
-    const { token } = cookies;
-    if (!token) {
-      throw new Error("Invalid Token");
-    }
-
-    const decodedMessage = await jwt.verify(token, "DEV@Connect1998");
-
-    const { _id } = decodedMessage;
-
-    const user = await User.findById(_id);
-    if (!user) {
-      throw new Error("User does not exist");
-    }
+    const user = req.user;
 
     res.send(user);
   } catch (err) {
@@ -90,6 +77,12 @@ app.post("/login", async (req, res) => {
     res.status(400).send(`Error : ${err.message}`);
   }
 });
+
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  const userFirstName = req?.user?.firstName;
+  res.send(userFirstName + " Send a connection request!");
+});
+
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
   console.log(req.body);
@@ -104,6 +97,7 @@ app.get("/user", async (req, res) => {
     res.status(400).send("User not found: something when wrong");
   }
 });
+
 app.get("/feed", async (req, res) => {
   console.log(req.body);
 
@@ -131,6 +125,7 @@ app.delete("/user", async (req, res) => {
     res.status(400).send("User not found: something when wrong");
   }
 });
+
 app.patch("/user/:userId", async (req, res) => {
   const userId = req.params?.userId;
   console.log("body", req.body);
