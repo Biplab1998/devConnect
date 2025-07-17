@@ -29,7 +29,10 @@ const validateEditProfileData = (req) => {
 
   return isEditAllowed;
 };
+
+const validateForgetPassword = () => {};
 module.exports = {
   validateSignUpData,
   validateEditProfileData,
+  validateForgetPassword,
 };
